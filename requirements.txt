@@ -1,0 +1,12 @@
+django
+django-crispy-forms
+crispy-bootstrap5
+chardet==5.2.0
+psycopg2-binary==2.9.9
+pandas==2.2.2
+django-allauth==65.0.2
+social-auth-app-django==5.4.2
+django-softdelete==0.11.2
+django-model-utils==5.0.0
+django-timestamps==0.0.1
+django-environ

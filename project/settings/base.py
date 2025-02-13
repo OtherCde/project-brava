@@ -44,6 +44,10 @@ DJANGO_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',  
+    'rest_framework',
+    'rest_framework_simplejwt',
+    # CORS Headers
+    'corsheaders',
 )
 
 # Aplicaciones de Terceros
@@ -59,7 +63,8 @@ THIRD_PARTY_APPS = (
 )
 
 LOCAL_APPS = (
-    
+    'users',
+    'core',
 )
 
 # Aplicaciones Locales
@@ -67,6 +72,7 @@ INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 🚀 Agrega esta línea aquí
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -153,3 +159,21 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Configuración de CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Permitir peticiones desde React
+    "http://127.0.0.1:3000",
+    "https://agu.dev.demo.okarol.com"
+]
+
+# Si quieres permitir todas las solicitudes desde cualquier origen (no recomendado en producción)
+# CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True  # Permitir que se envíen cookies y autenticación

@@ -65,6 +65,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'users',
     'core',
+    'blogs',
 )
 
 # Aplicaciones Locales
@@ -155,7 +156,7 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -177,3 +178,9 @@ CORS_ALLOWED_ORIGINS = [
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True  # Permitir que se envíen cookies y autenticación
+
+# Para PERMITIR LA CONFIGURACION DE LOS USUARIOS
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Usa la base de datos para almacenar sesiones
+SESSION_COOKIE_HTTPONLY = True  # Protege la cookie de sesión
+SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Permite que la sesión persista después de cerrar el navegador

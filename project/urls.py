@@ -25,7 +25,10 @@ urlpatterns = [
     path('core/', include('core.urls')),
     # Rutas para USUARIOS
     path('users/', include('users.urls')),  # Agregar autenticación
+    # Rutas para BLOGS
     path('blogs/', include('blogs.urls')),
+    # Rutas para PROGRAMAS
+    path('programs/', include('programs.urls')),
 ]
 
 if settings.DEBUG:

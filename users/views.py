@@ -1,5 +1,9 @@
 from django.shortcuts import get_object_or_404, render, redirect
+# Autenticacion de DJANGO
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.middleware import AuthenticationMiddleware
+from django.middleware.csrf import get_token
+# Messages
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Q, F
@@ -28,14 +32,31 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 class LoginView(APIView):
     def post(self, request):
-        
         serializer = LoginSerializer(data=request.data)
+        print("Datos recibidos:", request.data)
 
         if serializer.is_valid():
             user = serializer.validated_data['user']
             remember = serializer.validated_data['remember']
 
-            login(request, user)
+            # 🔥 Autenticar al usuario para asegurarnos de que Django lo reconoce
+            user1 = authenticate(request, username=user.username, password=request.data.get("password"))
+
+            if user1 is None:
+                return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            login(request, user)  # 🔥 Iniciar sesión en Django
+
+            # 🔥 Asegurar que la sesión se guarde correctamente
+            request.session.modified = True  
+            request.session.save()
+
+            # 🔥 Forzar a Django a reconocer la sesión
+            AuthenticationMiddleware(lambda req: None)(request)
+
+            print(f"✅ Usuario autenticado: {user1.username}")
+            print(f"🆔 Session ID después del login: {request.session.session_key}")
+
 
             if remember:
                 request.session.set_expiry(1209600)  # 2 semanas
@@ -58,6 +79,7 @@ class LoginView(APIView):
 
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 def login_view(request):
     if request.method == 'POST':

@@ -9,16 +9,6 @@ env = environ.Env()
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-
-# DEBUGGING: Imprimir variables obtenidas
-print("🔍 Variables de entorno detectadas:")
-print(f"DB_NAME: {env('DB_NAME', default='NO ENCONTRADO')}")
-print(f"DB_USER: {env('DB_USER', default='NO ENCONTRADO')}")
-print(f"DB_PASSWORD: {env('DB_PASSWORD', default='NO ENCONTRADO')}")
-print(f"DB_HOST: {env('DB_HOST', default='NO ENCONTRADO')}")
-print(f"DB_PORT: {env('DB_PORT', default='NO ENCONTRADO')}")
-print(f"SECRET_KEY: {env('SECRET_KEY', default='NO ENCONTRADO')}")
-
 # Printeamos para ver que que variables obtuvimos
 #print("clave \n", secret)
 

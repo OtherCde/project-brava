@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 # Importando Librerias para caonfiguracion base del proyecto
 import json, os
@@ -45,6 +46,7 @@ DJANGO_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.sites',  
     'rest_framework',
+    'rest_framework.authtoken',  # Necesario para manejar tokens
     'rest_framework_simplejwt',
     # CORS Headers
     'corsheaders',
@@ -57,9 +59,11 @@ THIRD_PARTY_APPS = (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'social_django',  
+    'social_django', 
+    'dj_rest_auth', 
     # Proveedores de Users, Google
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',  # Para Facebook
 )
 
 LOCAL_APPS = (
@@ -129,6 +133,12 @@ AUTH_USER_MODEL = "users.User"
 
 SITE_ID = 1  # Asegúrate de que esto esté configurado
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'social_core.backends.facebook.FacebookOAuth2',
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -184,3 +194,36 @@ SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Usa la base de datos p
 SESSION_COOKIE_HTTPONLY = True  # Protege la cookie de sesión
 SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Permite que la sesión persista después de cerrar el navegador
+
+REST_USE_JWT = True  # Activa JWT en dj-rest-auth
+
+DJANGO_ALLAUTH_PROVIDERS = ["google", "facebook"]
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Expira en 1 día
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'APP': {
+            'client_id': '510843295079891',        # Reemplaza con tu App ID
+            'secret': 'a68ee80fb2f200ab34b2b22e55d7aa89',       # Reemplaza con tu App Secret
+            'key': '',                       # Opcional
+        },
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'METHOD': 'oauth2',
+        'VERIFIED_EMAIL': True,
+    }
+}
+
+# Configuración adicional
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Para evitar doble verificación
+ACCOUNT_EMAIL_REQUIRED = True
+# settings.py
+ACCOUNT_USERNAME_REQUIRED = False  # No obligar a username
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Crear usuario automáticamente
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # No verificar email por correo

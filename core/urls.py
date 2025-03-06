@@ -9,6 +9,10 @@ urlpatterns = [
         'get-user/', 
         auth_status, 
         name='login'
-    ),  
+    ),
+    # Autenticacion por google
+    path('auth/google/', GoogleLogin.as_view(), name='google_login'),
+    # Autenticacion por Facebook
+    path('auth/facebook/', FacebookLogin.as_view(), name='facebook_login'),
 
 ]

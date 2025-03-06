@@ -1,5 +1,4 @@
 from django.db import models
-from django import forms
 # Create your models here.
 from django.contrib.auth.models import AbstractUser
 from core.models import BaseAbstractWithUser

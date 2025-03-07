@@ -164,12 +164,8 @@ LOGIN_URL = '/users/login/'
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-<<<<<<< HEAD
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-=======
 # Aquí defines el directorio donde Django colocará los archivos estáticos en producción
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Debe ser diferente de STATICFILES_DIRS
->>>>>>> origin/main
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

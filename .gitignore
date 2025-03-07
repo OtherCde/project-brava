@@ -1,6 +1,7 @@
 env-brav/
 /pruebas/
 .env
+staticfiles/
 
 # Compiled Java class files
 *.class

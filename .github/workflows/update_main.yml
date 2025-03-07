@@ -1,0 +1,64 @@
+name: Update Repository & Deploy Changes
+
+on:
+    pull_request:
+      branches: [main]  # Se activa cuando se crea o mergea un PR en main
+      types: [closed]  # Se ejecuta solo cuando el PR es cerrado (mergeado)
+    workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub Actions
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurar SSH
+        run: |
+          echo "🔹 Creando la clave privada..." 
+          echo "${{ secrets.SSH_MAIN }}" > private_key
+          chmod 600 private_key 
+          
+          echo "🔹 Iniciando ssh-agent..."
+          eval "$(ssh-agent -s)"
+          
+          export SSH_ASKPASS=/bin/echo
+          echo "🔹 Agregando clave SSH con passphrase..." 
+          echo "${{ secrets.SSH_PASSPHRASE }}" | setsid ssh-add private_key
+          
+          echo "🔹 Configurando ~/.ssh/config..."
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+           
+          echo "✅ Configuración SSH completada"
+
+      - name: Actualizar repositorio
+        run: |
+          echo "🔹 Verificando existencia de private_key..."
+          ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
+          
+          echo "🔹 Iniciando ssh-agent..."
+          eval "$(ssh-agent -s)"
+          
+          echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
+          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
+          
+          echo "🔹 Conectando al servidor y ejecutando despliegue..."
+          ssh -i private_key brava-ssh@64.227.97.181<< "EOF"
+            set -e  # Detener ante errores
+            cd htdocs/brava.okarol.com  # Asegúrate de que esta ruta sea correcta
+
+            # Actualizar
+            OLD_COMMIT=$(git rev-parse HEAD)
+            git pull origin main  # Se actualiza desde la rama main
+
+            # Instalar dependencias (si es necesario)
+            source env-brav/bin/activate  # Activar tu entorno virtual
+            pip install -r requirements.txt
+
+            # Ejecutar migraciones solo si hubo cambios
+            if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
+              python manage.py migrate
+            fi
+
+            echo "✅ Actualización completada"
+            exit
+          EOF

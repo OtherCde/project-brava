@@ -57,4 +57,10 @@ urlpatterns = [
         TokenRefreshView.as_view(), 
         name='token_refresh'
     ),  # Refrescar token
+    # Login con GOOGLE
+    path(
+        'login/google/',
+        GoogleLogin.as_view(),
+        name="google_login"
+    )
 ]

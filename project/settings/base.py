@@ -164,12 +164,8 @@ LOGIN_URL = '/users/login/'
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-<<<<<<< HEAD
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-=======
 # Aquí defines el directorio donde Django colocará los archivos estáticos en producción
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Debe ser diferente de STATICFILES_DIRS
->>>>>>> origin/main
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -201,9 +197,9 @@ SESSION_COOKIE_HTTPONLY = True  # Protege la cookie de sesión
 SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Permite que la sesión persista después de cerrar el navegador
 
-REST_USE_JWT = True  # Activa JWT en dj-rest-auth
+# REST_USE_JWT = True  # Activa JWT en dj-rest-auth
 
-DJANGO_ALLAUTH_PROVIDERS = ["google", "facebook"]
+# DJANGO_ALLAUTH_PROVIDERS = ["google", "facebook"]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Expira en 1 día
@@ -212,19 +208,32 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-SOCIALACCOUNT_PROVIDERS = {
-    'facebook': {
-        'APP': {
-            'client_id': '',        # Reemplaza con tu App ID
-            'secret': '',       # Reemplaza con tu App Secret
-            'key': '',                       # Opcional
-        },
-        'SCOPE': ['email', 'public_profile'],
-        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-        'METHOD': 'oauth2',
-        'VERIFIED_EMAIL': True,
-    }
-}
+# SOCIALACCOUNT_PROVIDERS = {
+#     'facebook': {
+#         'APP': {
+#             'client_id': '',        # Reemplaza con tu App ID
+#             'secret': '',       # Reemplaza con tu App Secret
+#             'key': '',                       # Opcional
+#         },
+#         'SCOPE': ['email', 'public_profile'],
+#         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+#         'METHOD': 'oauth2',
+#         'VERIFIED_EMAIL': True,
+#     },
+#     'google': {
+#         'APP': {
+#             'client_id': '', # Estas variables deberian estar en .env   
+#             'secret': '',
+#             'key': ''
+#         },
+#         'SCOPE': ['profile', 'email'],
+#         'AUTH_PARAMS': {'access_type': 'online'},
+#     }
+# }
+
+# Cliente de Google (necesario para la vista personalizada)
+GOOGLE_CLIENT_ID = ''
+GOOGLE_CLIENT_SECRET = ''
 
 # Configuración adicional
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Para evitar doble verificación

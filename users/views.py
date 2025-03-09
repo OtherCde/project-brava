@@ -399,3 +399,105 @@ def delete_user(request, pk):
         print(f"Error back --> {str(e)}")
         # En caso de error, retorna un JSON con el estado de error
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+############################################################
+####################### AUTENTICACION POR GOOGLE ######################
+############################################################
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import re
+import requests
+import json
+
+User = get_user_model()
+
+class GoogleLogin(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            code = data.get("code")
+
+            if not code:
+                return Response({"error": "Código de autorización no proporcionado"}, status=400)
+
+            # 🔥 Intercambiar `code` por un `id_token`
+            token_url = "https://oauth2.googleapis.com/token"
+            token_data = {
+                "code": code,
+                "client_id": settings.GOOGLE_CLIENT_ID,
+                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "redirect_uri": "http://localhost:5173",  # Asegúrate de que coincide con Google Console
+                "grant_type": "authorization_code",
+            }
+
+            token_response = requests.post(token_url, data=token_data)
+            token_json = token_response.json()
+
+            # print("Respuesta de Google:", token_json)  # 🔎 Depuración
+
+            if "id_token" not in token_json:
+                return Response({"error": "No se pudo obtener el ID Token"}, status=400)
+
+            id_token_google = token_json["id_token"]
+
+            # 🔥 Verificar ID Token con Google
+            id_info = id_token.verify_oauth2_token(
+                id_token_google,
+                google_requests.Request(),
+                settings.GOOGLE_CLIENT_ID
+            )
+
+            # print("Datos del token:", id_info)
+
+            # Verificar audiencia y issuer
+            if id_info["aud"] != settings.GOOGLE_CLIENT_ID:
+                raise ValueError("El token no está destinado a este cliente.")
+
+            if id_info["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
+                raise ValueError("Issuer incorrecto.")
+
+            # Obtener información del usuario
+            email = id_info["email"]
+            first_name = id_info.get("given_name", "")
+            last_name = id_info.get("family_name", "")
+
+            # Generar username único
+            username = re.sub(r"[^a-zA-Z0-9_]", "", email.split("@")[0])
+            base_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            # Crear o obtener usuario
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "username": username,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                }
+            )
+
+            # Generar tokens JWT
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username
+                }
+            }, status=status.HTTP_200_OK)
+
+        except ValueError as e:
+            print("Error durante la validación del token:", str(e))
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print("Error general:", str(e))
+            return Response({"error": "Error en el servidor"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

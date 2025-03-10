@@ -2,9 +2,9 @@ name: Update Repository & Deploy Changes
 
 on:
     pull_request:
-      branches: [main]
-      types: [closed]
-    workflow_dispatch:
+      branches: [main]  # Se activa cuando se crea o mergea un PR en main
+      types: [closed]  # Se ejecuta solo cuando el PR es cerrado (mergeado)
+    workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub Actions
 
 jobs:
   update-repo:
@@ -17,16 +17,21 @@ jobs:
           echo "${{ secrets.SSH_MAIN }}" > private_key
           chmod 600 private_key 
           
+          echo "🔹 Iniciando ssh-agent..."
           eval "$(ssh-agent -s)"
-          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key
+          
+          export SSH_ASKPASS=/bin/echo
+          echo "🔹 Agregando clave SSH con passphrase..." 
+          echo "${{ secrets.SSH_PASSPHRASE }}" | setsid ssh-add private_key
+          
+          echo "🔹 Configurando ~/.ssh/config..."
           mkdir -p ~/.ssh
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
-
+           
           echo "✅ Configuración SSH completada"
 
       - name: Actualizar repositorio
         run: |
-
           echo "🔹 Verificando existencia de private_key..."
           ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
           
@@ -37,42 +42,41 @@ jobs:
           echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
           
           echo "🔹 Conectando al servidor y ejecutando despliegue..."
+          ssh -i private_key brava-ssh@64.227.97.181<< "EOF"
+            set -e  # Detener ante errores
+            cd htdocs/brava.okarol.com  # Asegúrate de que esta ruta sea correcta
 
-          ssh -T -i private_key brava-ssh@64.227.97.181 << 'DEPLOY_EOF'
-            set -e
-            cd htdocs/brava.okarol.com
+            # Copiar .env.example a .env (si no existe)
+            if [ ! -f .env ]; then
+              cp .env.example .env
+            fi
 
-            # Crear .env usando variables del entorno
-            cat > .env << ENV_EOF
-            SECRET_KEY='$SECRET_KEY'
-            DB_NAME='$DB_NAME'
-            DB_USER='$DB_USER'
-            DB_PASSWORD='$DB_PASSWORD'
-            DB_HOST='$DB_HOST'
-            DB_PORT='$DB_PORT'
-            GOOGLE_CLIENT_ID='$GOOGLE_CLIENT_ID'
-            GOOGLE_CLIENT_SECRET='$GOOGLE_CLIENT_SECRET'
-            FACEBOOK_APP_ID='$FACEBOOK_APP_ID'
-            FACEBOOK_APP_SECRET='$FACEBOOK_APP_SECRET'
-            FACEBOOK_REDIRECT_URI='$FACEBOOK_REDIRECT_URI'
-            ENV_EOF
+            # Rellenar .env con variables desde GitHub Secrets
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_ID }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_SECRET }}" >> .env
+            echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_ID }}" >> .env
+            echo "FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_SECRET }}" >> .env
+            echo "FACEBOOK_REDIRECT_URI=${{ secrets.FACEBOOK_REDIRECT }}" >> .env
+            
+            # Actualizar
+            OLD_COMMIT=$(git rev-parse HEAD)
+            git pull origin main  # Se actualiza desde la rama main
 
-            git pull origin main
-            source env-brav/bin/activate
+            # Instalar dependencias (si es necesario)
+            source env-brav/bin/activate  # Activar tu entorno virtual
             pip install -r requirements.txt
-            python manage.py migrate
+
+            # Ejecutar migraciones solo si hubo cambios
+            if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
+              python manage.py migrate
+            fi
 
             echo "✅ Actualización completada"
-          DEPLOY_EOF
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_SECRET }}
-          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_ID }}
-          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_SECRET }}
-          FACEBOOK_REDIRECT_URI: ${{ secrets.FACEBOOK_REDIRECT }}
+            exit
+          EOF

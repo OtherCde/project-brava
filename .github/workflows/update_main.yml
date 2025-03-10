@@ -2,9 +2,9 @@ name: Update Repository & Deploy Changes
 
 on:
     pull_request:
-      branches: [main]  # Se activa cuando se crea o mergea un PR en main
-      types: [closed]  # Se ejecuta solo cuando el PR es cerrado (mergeado)
-    workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub Actions
+      branches: [main]
+      types: [closed]
+    workflow_dispatch:
 
 jobs:
   update-repo:
@@ -17,21 +17,16 @@ jobs:
           echo "${{ secrets.SSH_MAIN }}" > private_key
           chmod 600 private_key 
           
-          echo "🔹 Iniciando ssh-agent..."
           eval "$(ssh-agent -s)"
-          
-          export SSH_ASKPASS=/bin/echo
-          echo "🔹 Agregando clave SSH con passphrase..." 
-          echo "${{ secrets.SSH_PASSPHRASE }}" | setsid ssh-add private_key
-          
-          echo "🔹 Configurando ~/.ssh/config..."
+          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key
           mkdir -p ~/.ssh
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
-           
+
           echo "✅ Configuración SSH completada"
 
       - name: Actualizar repositorio
         run: |
+
           echo "🔹 Verificando existencia de private_key..."
           ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
           
@@ -42,12 +37,13 @@ jobs:
           echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
           
           echo "🔹 Conectando al servidor y ejecutando despliegue..."
+
           ssh -T -i private_key brava-ssh@64.227.97.181 << 'DEPLOY_EOF'
             set -e
             cd htdocs/brava.okarol.com
 
-            # Crear/Actualizar .env
-            cat > .env << 'ENV_EOF'
+            # Crear .env usando variables del entorno
+            cat > .env << ENV_EOF
             SECRET_KEY='$SECRET_KEY'
             DB_NAME='$DB_NAME'
             DB_USER='$DB_USER'
@@ -61,16 +57,10 @@ jobs:
             FACEBOOK_REDIRECT_URI='$FACEBOOK_REDIRECT_URI'
             ENV_EOF
 
-            # Actualizar código
-            OLD_COMMIT=$(git rev-parse HEAD)
             git pull origin main
-
             source env-brav/bin/activate
             pip install -r requirements.txt
-
-            if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
-              python manage.py migrate
-            fi
+            python manage.py migrate
 
             echo "✅ Actualización completada"
           DEPLOY_EOF

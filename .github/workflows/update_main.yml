@@ -46,23 +46,20 @@ jobs:
             set -e  # Detener ante errores
             cd htdocs/brava.okarol.com  # Asegúrate de que esta ruta sea correcta
 
-            # Copiar .env.example a .env (si no existe)
-            if [ ! -f .env ]; then
-              cp .env.example .env
-            fi
-
-            # Rellenar .env con variables desde GitHub Secrets
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_ID}} >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_SECRET }}" >> .env
-            echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_ID }}" >> .env
-            echo "FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_SECRET }}" >> .env
-            echo "FACEBOOK_REDIRECT_URI=${{ secrets.FACEBOOK_REDIRECT }}" >> .env
+             # Crear/Actualizar .env
+            cat > .env << ENV_EOF
+            SECRET_KEY='$SECRET_KEY'
+            DB_NAME='$DB_NAME'
+            DB_USER='$DB_USER'
+            DB_PASSWORD='$DB_PASSWORD'
+            DB_HOST='$DB_HOST'
+            DB_PORT='$DB_PORT'
+            GOOGLE_CLIENT_ID='$GOOGLE_CLIENT_ID'
+            GOOGLE_CLIENT_SECRET='$GOOGLE_CLIENT_SECRET'
+            FACEBOOK_APP_ID='$FACEBOOK_APP_ID'
+            FACEBOOK_APP_SECRET='$FACEBOOK_APP_SECRET'
+            FACEBOOK_REDIRECT_URI='$FACEBOOK_REDIRECT_URI'
+            ENV_EOF
 
             # Actualizar
             OLD_COMMIT=$(git rev-parse HEAD)
@@ -80,3 +77,15 @@ jobs:
             echo "✅ Actualización completada"
             exit
           EOF
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_SECRET }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_SECRET }}
+          FACEBOOK_REDIRECT_URI: ${{ secrets.FACEBOOK_REDIRECT }}

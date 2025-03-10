@@ -30,62 +30,60 @@ jobs:
            
           echo "✅ Configuración SSH completada"
 
-      - name: Actualizar repositorio
-        run: |
-          echo "🔹 Verificando existencia de private_key..."
-          ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
-          
-          echo "🔹 Iniciando ssh-agent..."
-          eval "$(ssh-agent -s)"
-          
-          echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
-          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
-          
-          echo "🔹 Conectando al servidor y ejecutando despliegue..."
-          ssh -i private_key brava-ssh@64.227.97.181<< "EOF"
-            set -e  # Detener ante errores
-            cd htdocs/brava.okarol.com  # Asegúrate de que esta ruta sea correcta
-
-             # Crear/Actualizar .env
-            cat > .env << ENV_EOF
-            SECRET_KEY='$SECRET_KEY'
-            DB_NAME='$DB_NAME'
-            DB_USER='$DB_USER'
-            DB_PASSWORD='$DB_PASSWORD'
-            DB_HOST='$DB_HOST'
-            DB_PORT='$DB_PORT'
-            GOOGLE_CLIENT_ID='$GOOGLE_CLIENT_ID'
-            GOOGLE_CLIENT_SECRET='$GOOGLE_CLIENT_SECRET'
-            FACEBOOK_APP_ID='$FACEBOOK_APP_ID'
-            FACEBOOK_APP_SECRET='$FACEBOOK_APP_SECRET'
-            FACEBOOK_REDIRECT_URI='$FACEBOOK_REDIRECT_URI'
-            ENV_EOF
-
-            # Actualizar
-            OLD_COMMIT=$(git rev-parse HEAD)
-            git pull origin main  # Se actualiza desde la rama main
-
-            # Instalar dependencias (si es necesario)
-            source env-brav/bin/activate  # Activar tu entorno virtual
-            pip install -r requirements.txt
-
-            # Ejecutar migraciones solo si hubo cambios
-            if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
-              python manage.py migrate
-            fi
-
-            echo "✅ Actualización completada"
-            exit
-          EOF
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_SECRET }}
-          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_ID }}
-          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_SECRET }}
-          FACEBOOK_REDIRECT_URI: ${{ secrets.FACEBOOK_REDIRECT }}
+          - name: Actualizar repositorio
+          run: |
+            echo "🔹 Verificando existencia de private_key..."
+            ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
+            
+            echo "🔹 Iniciando ssh-agent..."
+            eval "$(ssh-agent -s)"
+            
+            echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
+            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
+            
+            echo "🔹 Conectando al servidor y ejecutando despliegue..."
+            ssh -T -i private_key brava-ssh@64.227.97.181 << 'DEPLOY_EOF'
+              set -e
+              cd htdocs/brava.okarol.com
+  
+              # Crear/Actualizar .env
+              cat > .env << 'ENV_EOF'
+              SECRET_KEY='$SECRET_KEY'
+              DB_NAME='$DB_NAME'
+              DB_USER='$DB_USER'
+              DB_PASSWORD='$DB_PASSWORD'
+              DB_HOST='$DB_HOST'
+              DB_PORT='$DB_PORT'
+              GOOGLE_CLIENT_ID='$GOOGLE_CLIENT_ID'
+              GOOGLE_CLIENT_SECRET='$GOOGLE_CLIENT_SECRET'
+              FACEBOOK_APP_ID='$FACEBOOK_APP_ID'
+              FACEBOOK_APP_SECRET='$FACEBOOK_APP_SECRET'
+              FACEBOOK_REDIRECT_URI='$FACEBOOK_REDIRECT_URI'
+              ENV_EOF
+  
+              # Actualizar código
+              OLD_COMMIT=$(git rev-parse HEAD)
+              git pull origin main
+  
+              source env-brav/bin/activate
+              pip install -r requirements.txt
+  
+              if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
+                python manage.py migrate
+              fi
+  
+              echo "✅ Actualización completada"
+            DEPLOY_EOF
+          env:
+            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            DB_NAME: ${{ secrets.DB_NAME }}
+            DB_USER: ${{ secrets.DB_USER }}
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_PORT: ${{ secrets.DB_PORT }}
+            GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_ID }}
+            GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_SECRET }}
+            FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_ID }}
+            FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_SECRET }}
+            FACEBOOK_REDIRECT_URI: ${{ secrets.FACEBOOK_REDIRECT }}
+  

@@ -231,13 +231,24 @@ SIMPLE_JWT = {
 #     }
 # }
 
+import environ # Cargamos lectura de .ENV
+import os
+
+# Si verifica esta expreion, estamos en entornode desarrollo
+env = environ.Env()
+#environ.Env.read_env() # Lee el archivo .env automaticamente
+# Cargamos las variables de entorno desde el archivo .env
+
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
+
 # Cliente de Google (necesario para la vista personalizada)
-GOOGLE_CLIENT_ID = ''
-GOOGLE_CLIENT_SECRET = ''
+GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = env('GOOGLE_CLIENT_SECRET')
 # Cliente de Google (necesario para la vista personalizada)
-FACEBOOK_APP_ID = ''
-FACEBOOK_APP_SECRET = ''
-FACEBOOK_REDIRECT_URI = 'http://localhost:5173/auth/facebook/callback'
+FACEBOOK_APP_ID = env('FACEBOOK_APP_ID')
+FACEBOOK_APP_SECRET = env('FACEBOOK_APP_SECRET')
+FACEBOOK_REDIRECT_URI = env('FACEBOOK_REDIRECT_URI')
 
 # Configuración adicional
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Para evitar doble verificación

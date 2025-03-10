@@ -234,6 +234,10 @@ SIMPLE_JWT = {
 # Cliente de Google (necesario para la vista personalizada)
 GOOGLE_CLIENT_ID = ''
 GOOGLE_CLIENT_SECRET = ''
+# Cliente de Google (necesario para la vista personalizada)
+FACEBOOK_APP_ID = ''
+FACEBOOK_APP_SECRET = ''
+FACEBOOK_REDIRECT_URI = 'http://localhost:5173/auth/facebook/callback'
 
 # Configuración adicional
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Para evitar doble verificación

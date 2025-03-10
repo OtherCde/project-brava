@@ -62,5 +62,11 @@ urlpatterns = [
         'login/google/',
         GoogleLogin.as_view(),
         name="google_login"
-    )
+    ),
+    # Login con FACEBOOK
+    path(
+        'login/facebook/',
+        FacebookLogin.as_view(),
+        name="facebook_login"
+    ),
 ]

@@ -30,35 +30,62 @@ jobs:
            
           echo "✅ Configuración SSH completada"
 
-      - name: Actualizar repositorio
-        run: |
-          echo "🔹 Verificando existencia de private_key..."
-          ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
-          
-          echo "🔹 Iniciando ssh-agent..."
-          eval "$(ssh-agent -s)"
-          
-          echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
-          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
-          
-          echo "🔹 Conectando al servidor y ejecutando despliegue..."
-          ssh -i private_key brava-ssh@64.227.97.181<< "EOF"
-            set -e  # Detener ante errores
-            cd htdocs/brava.okarol.com  # Asegúrate de que esta ruta sea correcta
-
-            # Actualizar
-            OLD_COMMIT=$(git rev-parse HEAD)
-            git pull origin main  # Se actualiza desde la rama main
-
-            # Instalar dependencias (si es necesario)
-            source env-brav/bin/activate  # Activar tu entorno virtual
-            pip install -r requirements.txt
-
-            # Ejecutar migraciones solo si hubo cambios
-            if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
-              python manage.py migrate
-            fi
-
-            echo "✅ Actualización completada"
-            exit
-          EOF
+          - name: Actualizar repositorio
+          run: |
+            echo "🔹 Verificando existencia de private_key..."
+            ls -l private_key || echo "⚠️ ERROR: private_key no encontrado"
+            
+            echo "🔹 Iniciando ssh-agent..."
+            eval "$(ssh-agent -s)"
+            
+            echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
+            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
+            
+            echo "🔹 Conectando al servidor y ejecutando despliegue..."
+            ssh -i private_key brava-ssh@64.227.97.181 << "EOF"
+              set -e
+              cd htdocs/brava.okarol.com
+        
+              # Copiar .env.example si no existe
+              if [ ! -f .env ]; then
+                cp .env.example .env
+              fi
+        
+              # Rellenar .env usando variables pasadas desde GitHub
+              echo "SECRET_KEY=$SECRET_KEY" >> .env
+              echo "DB_NAME=$DB_NAME" >> .env
+              echo "DB_USER=$DB_USER" >> .env
+              echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+              echo "DB_HOST=$DB_HOST" >> .env
+              echo "DB_PORT=$DB_PORT" >> .env
+              echo "GOOGLE_CLIENT_ID=$GOOGLE_ID" >> .env
+              echo "GOOGLE_CLIENT_SECRET=$GOOGLE_SECRET" >> .env
+              echo "FACEBOOK_APP_ID=$FACEBOOK_ID" >> .env
+              echo "FACEBOOK_APP_SECRET=$FACEBOOK_SECRET" >> .env
+              echo "FACEBOOK_REDIRECT_URI=$FACEBOOK_REDIRECT" >> .env
+        
+              OLD_COMMIT=$(git rev-parse HEAD)
+              git pull origin main
+        
+              source env-brav/bin/activate
+              pip install -r requirements.txt
+        
+              if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
+                python manage.py migrate
+              fi
+        
+              echo "✅ Actualización completada"
+              exit
+            EOF
+          env:
+            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            DB_NAME: ${{ secrets.DB_NAME }}
+            DB_USER: ${{ secrets.DB_USER }}
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_PORT: ${{ secrets.DB_PORT }}
+            GOOGLE_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+            FACEBOOK_ID: ${{ secrets.FACEBOOK_APP_ID }}
+            FACEBOOK_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+            FACEBOOK_REDIRECT: ${{ secrets.FACEBOOK_REDIRECT_URI }}

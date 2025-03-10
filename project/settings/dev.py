@@ -1,10 +1,4 @@
 from .base import *
-import environ # Cargamos lectura de .ENV
-
-# Si verifica esta expreion, estamos en entornode desarrollo
-env = environ.Env()
-environ.Env.read_env() # Lee el archivo .env automaticamente
-# Cargamos las variables de entorno desde el archivo .env
 
 # Printeamos para ver que que variables obtuvimos
 #print("clave \n", secret)

@@ -197,9 +197,9 @@ SESSION_COOKIE_HTTPONLY = True  # Protege la cookie de sesión
 SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Permite que la sesión persista después de cerrar el navegador
 
-REST_USE_JWT = True  # Activa JWT en dj-rest-auth
+# REST_USE_JWT = True  # Activa JWT en dj-rest-auth
 
-DJANGO_ALLAUTH_PROVIDERS = ["google", "facebook"]
+# DJANGO_ALLAUTH_PROVIDERS = ["google", "facebook"]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Expira en 1 día
@@ -208,19 +208,48 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-SOCIALACCOUNT_PROVIDERS = {
-    'facebook': {
-        'APP': {
-            'client_id': '510843295079891',        # Reemplaza con tu App ID
-            'secret': 'a68ee80fb2f200ab34b2b22e55d7aa89',       # Reemplaza con tu App Secret
-            'key': '',                       # Opcional
-        },
-        'SCOPE': ['email', 'public_profile'],
-        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-        'METHOD': 'oauth2',
-        'VERIFIED_EMAIL': True,
-    }
-}
+# SOCIALACCOUNT_PROVIDERS = {
+#     'facebook': {
+#         'APP': {
+#             'client_id': '',        # Reemplaza con tu App ID
+#             'secret': '',       # Reemplaza con tu App Secret
+#             'key': '',                       # Opcional
+#         },
+#         'SCOPE': ['email', 'public_profile'],
+#         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+#         'METHOD': 'oauth2',
+#         'VERIFIED_EMAIL': True,
+#     },
+#     'google': {
+#         'APP': {
+#             'client_id': '', # Estas variables deberian estar en .env   
+#             'secret': '',
+#             'key': ''
+#         },
+#         'SCOPE': ['profile', 'email'],
+#         'AUTH_PARAMS': {'access_type': 'online'},
+#     }
+# }
+
+import environ # Cargamos lectura de .ENV
+import os
+
+# Si verifica esta expreion, estamos en entornode desarrollo
+env = environ.Env()
+#environ.Env.read_env() # Lee el archivo .env automaticamente
+# Cargamos las variables de entorno desde el archivo .env
+
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
+
+# Cliente de Google (necesario para la vista personalizada)
+GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = env('GOOGLE_CLIENT_SECRET')
+# Cliente de Google (necesario para la vista personalizada)
+FACEBOOK_APP_ID = env('FACEBOOK_APP_ID')
+FACEBOOK_APP_SECRET = env('FACEBOOK_APP_SECRET')
+FACEBOOK_REDIRECT_URI = env('FACEBOOK_REDIRECT_URI')
+
 
 # Configuración adicional
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Para evitar doble verificación

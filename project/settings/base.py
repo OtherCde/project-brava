@@ -181,6 +181,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://brava.okarol.com",
     "http://127.0.0.1",
     "http://localhost",
+    "https://agu.dev.demo.okarol.com",
 ]
 
 # Configuración de CORS

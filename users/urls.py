@@ -26,26 +26,26 @@ urlpatterns = [
         name="profile"
     ),
     # Ruta para crear usuarios
-    path(
-        'create/',
-        create_user,
-        name="users_create"
-    ),
-    path(
-        'update/<int:pk>/',
-        update_user,
-        name="users_update"
-    ),
-    path(
-        'detail/<int:pk>/',
-        detail_user,
-        name="users_detail"
-    ),
-    path(
-        'delete/<int:pk>/',
-        delete_user,
-        name="users_delete"
-    ),
+    # path(
+    #     'create/',
+    #     create_user,
+    #     name="users_create"
+    # ),
+    # path(
+    #     'update/<int:pk>/',
+    #     update_user,
+    #     name="users_update"
+    # ),
+    # path(
+    #     'detail/<int:pk>/',
+    #     detail_user,
+    #     name="users_detail"
+    # ),
+    # path(
+    #     'delete/<int:pk>/',
+    #     delete_user,
+    #     name="users_delete"
+    # ),
     # Tokens
     path(
         'token/', 

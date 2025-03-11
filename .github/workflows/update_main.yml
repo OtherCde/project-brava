@@ -70,9 +70,12 @@ jobs:
             source env-brav/bin/activate  # Activar tu entorno virtual
             pip install -r requirements.txt
       
-            # Ejecutar migraciones solo si hubo cambios
-            if [ "$OLD_COMMIT" != "$(git rev-parse HEAD)" ]; then
+            # Verificar si hay migraciones pendientes
+            if [ "$(python manage.py showmigrations --plan | grep '\[ \]')" ]; then
+              echo "Migraciones pendientes. Ejecutando migrate..."
               python manage.py migrate
+            else
+              echo "No hay migraciones pendientes."
             fi
       
             echo "✅ Actualización completada"

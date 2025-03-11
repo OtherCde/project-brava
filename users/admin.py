@@ -15,12 +15,12 @@ class UserAdmin(BaseUserAdmin):
         ('Permisos', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Fechas importantes', {'fields': ('last_login', 'date_joined')}),
     )
-    
-    # Configuración del formulario para crear nuevos usuarios
+
+    # Configuración del formulario para crear nuevos usuarios, ahora incluyendo "groups"
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'first_name', 'last_name', 'email', 'password1', 'password2'),
+            'fields': ('username', 'first_name', 'last_name', 'email', 'groups', 'password1', 'password2'),
         }),
     )
 

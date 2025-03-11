@@ -135,8 +135,6 @@ SITE_ID = 1  # Asegúrate de que esto esté configurado
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-    'social_core.backends.facebook.FacebookOAuth2',
 ]
 
 

@@ -79,5 +79,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Elimina el campo password_confirm y crea el usuario"""
         validated_data.pop('password_confirm')  # Elimina el campo antes de guardar
+        # Si no se envió imagen o llega vacía, asignamos 'default.svg'
+        if not validated_data.get('profile_image'):
+            validated_data['profile_image'] = 'default.svg'
         user = User.objects.create_user(**validated_data)
         return user

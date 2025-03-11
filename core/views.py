@@ -11,9 +11,13 @@ from dj_rest_auth.serializers import JWTSerializer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])  # 🔥 Protege la vista con autenticación
 def auth_status(request):
+    user = request.user
+    groups = list(user.groups.values_list("name", flat=True))  # Obtiene los nombres de los grupos
+    
     return Response({
         "isAuthenticated": True,
-        "username": request.user.username
+        "username": user.username,
+        "groups": groups,  # Devuelve los grupos
     })
 
 class GoogleLogin(SocialLoginView):

@@ -81,43 +81,43 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            user_or_email = form.cleaned_data.get('user_or_email')
-            password = form.cleaned_data.get('password')
-            remember = request.POST.get('remember') or None
+# def login_view(request):
+#     if request.method == 'POST':
+#         form = LoginForm(request.POST)
+#         if form.is_valid():
+#             user_or_email = form.cleaned_data.get('user_or_email')
+#             password = form.cleaned_data.get('password')
+#             remember = request.POST.get('remember') or None
 
-            # Intentar autenticar como nombre de usuario
-            user = authenticate(request, username=user_or_email, password=password)
-            if user is None:
-                # Intentar autenticar como email
-                try:
-                    user_obj = User.objects.get(email=user_or_email)
-                    user = authenticate(request, username=user_obj.username, password=password)
-                except User.DoesNotExist:
-                    user = None
+#             # Intentar autenticar como nombre de usuario
+#             user = authenticate(request, username=user_or_email, password=password)
+#             if user is None:
+#                 # Intentar autenticar como email
+#                 try:
+#                     user_obj = User.objects.get(email=user_or_email)
+#                     user = authenticate(request, username=user_obj.username, password=password)
+#                 except User.DoesNotExist:
+#                     user = None
 
-            if user is not None:
-                # Manejar "Recuérdame"
-                if remember:
-                    request.session.set_expiry(1209600)  # 2 semanas
-                else:
-                    request.session.set_expiry(0)  # Expira al cerrar el navegador
-                login(request, user)
+#             if user is not None:
+#                 # Manejar "Recuérdame"
+#                 if remember:
+#                     request.session.set_expiry(1209600)  # 2 semanas
+#                 else:
+#                     request.session.set_expiry(0)  # Expira al cerrar el navegador
+#                 login(request, user)
 
-                # Almacenar el nombre del usuario en la sesión para usarlo en la barra superior
-                request.session['username'] = user.username
-                return redirect('core_app:home')
-            else:
-                # Usuario o contraseña incorrectos
-                messages.error(request, 'Usuario o contraseña incorrectos.')
-        else:
-            print("Errores del formulario:", form.errors)
-    else:
-        form = LoginForm()
-    return render(request, 'home/login.html', {'form': form})
+#                 # Almacenar el nombre del usuario en la sesión para usarlo en la barra superior
+#                 request.session['username'] = user.username
+#                 return redirect('core_app:home')
+#             else:
+#                 # Usuario o contraseña incorrectos
+#                 messages.error(request, 'Usuario o contraseña incorrectos.')
+#         else:
+#             print("Errores del formulario:", form.errors)
+#     else:
+#         form = LoginForm()
+#     return render(request, 'home/login.html', {'form': form})
 
 # USER LOGIN
 class UserProfileView(RetrieveAPIView):
@@ -147,23 +147,23 @@ class RegisterView(APIView):
         # SI LA PETICION ES FALSA
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# Vista BASADA EN FUNCION con DJANGO
-def register_view(request):
-    if request.method == 'POST':
-        print(request.POST)
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])  # Establecer la contraseña encriptada
-            user.save()
-            messages.success(request, 'Registro exitoso. Ahora puedes iniciar sesión.')
-            return redirect('users_app:login')  # Redirige a la página de inicio de sesión
-        else:
-            messages.error(request, 'Error al registrar. Verifica los datos ingresados.')
-    else:
-        form = RegisterForm()
+# # Vista BASADA EN FUNCION con DJANGO
+# def register_view(request):
+#     if request.method == 'POST':
+#         print(request.POST)
+#         form = RegisterForm(request.POST)
+#         if form.is_valid():
+#             user = form.save(commit=False)
+#             user.set_password(form.cleaned_data['password'])  # Establecer la contraseña encriptada
+#             user.save()
+#             messages.success(request, 'Registro exitoso. Ahora puedes iniciar sesión.')
+#             return redirect('users_app:login')  # Redirige a la página de inicio de sesión
+#         else:
+#             messages.error(request, 'Error al registrar. Verifica los datos ingresados.')
+#     else:
+#         form = RegisterForm()
 
-    return render(request, 'home/register.html', {'form': form})
+#     return render(request, 'home/register.html', {'form': form})
 
 
 
@@ -186,219 +186,219 @@ class LogoutView(APIView):
         return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
     
     
-@csrf_exempt # Solo si estás usando fetch sin un formulario, para evitar problemas con CSRF
-def logout_view(request):
-    # Validamos que la peticion sea POST
-    if request.method == 'POST':  # Solo permitimos POST para mayor seguridad
-        logout(request)
-        return JsonResponse({'status': 'success', 'message': 'User logged out successfully'})
+# @csrf_exempt # Solo si estás usando fetch sin un formulario, para evitar problemas con CSRF
+# def logout_view(request):
+#     # Validamos que la peticion sea POST
+#     if request.method == 'POST':  # Solo permitimos POST para mayor seguridad
+#         logout(request)
+#         return JsonResponse({'status': 'success', 'message': 'User logged out successfully'})
     
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+#     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-@login_required
-def profile_edit_view(request):
-    user = request.user
+# @login_required
+# def profile_edit_view(request):
+#     user = request.user
 
-    if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=user)  # Agregar request.FILES para manejar archivos
-        if form.is_valid():
-            # Guardar los cambios del formulario en la base de datos
-            user = form.save(commit=False)
+#     if request.method == 'POST':
+#         form = ProfileForm(request.POST, instance=user)  # Agregar request.FILES para manejar archivos
+#         if form.is_valid():
+#             # Guardar los cambios del formulario en la base de datos
+#             user = form.save(commit=False)
 
-            # Si hay una imagen de perfil seleccionada o subida, actualizarla
-            selected_image = form.cleaned_data.get('profile_image')
-            if selected_image:
-                user.profile_image = selected_image  # Asumiendo que el modelo tiene un campo `profile_image`
+#             # Si hay una imagen de perfil seleccionada o subida, actualizarla
+#             selected_image = form.cleaned_data.get('profile_image')
+#             if selected_image:
+#                 user.profile_image = selected_image  # Asumiendo que el modelo tiene un campo `profile_image`
 
-            user.save()  # Guarda los cambios del usuario, incluidos los datos actualizados
+#             user.save()  # Guarda los cambios del usuario, incluidos los datos actualizados
 
-            # Guardar la imagen de perfil seleccionada en la sesión para mostrarla después
-            request.session['profile_image'] = selected_image
+#             # Guardar la imagen de perfil seleccionada en la sesión para mostrarla después
+#             request.session['profile_image'] = selected_image
 
-            messages.success(request, 'Perfil actualizado exitosamente.')
-            return redirect('users_app:profile')  # Asegúrate de que esta vista redirija a la página principal o a donde desees
-        else:
-            messages.error(request, 'Hubo un error al actualizar el perfil.')
-    else:
-        form = ProfileForm(instance=user)
-        # Asigna la imagen seleccionada previamente, si existe
-        form.initial['profile_image'] = request.session.get('profile_image', 'default.png')
+#             messages.success(request, 'Perfil actualizado exitosamente.')
+#             return redirect('users_app:profile')  # Asegúrate de que esta vista redirija a la página principal o a donde desees
+#         else:
+#             messages.error(request, 'Hubo un error al actualizar el perfil.')
+#     else:
+#         form = ProfileForm(instance=user)
+#         # Asigna la imagen seleccionada previamente, si existe
+#         form.initial['profile_image'] = request.session.get('profile_image', 'default.png')
 
-    context = {
-        'form': form,
-    }
+#     context = {
+#         'form': form,
+#     }
 
-    return render(request, 'home/page-user.html', context)
+#     return render(request, 'home/page-user.html', context)
 
 
 
-# USERS
+# # USERS
 
-# Create your views here.
-def user_list(request):
-    """
-    Método que redirecciona al datatable de usuarios.
-    """
-    urls = [
-        {'id': 'user_create', 'name': 'users_app:users_create'},
-        {'id': 'user_edit', 'name': 'users_app:users_update'},
-        {'id': 'user_detail', 'name': 'users_app:users_detail'},
-        {'id': 'user_delete', 'name': 'users_app:users_delete'}
-    ]
-    exclude_fields = ['user_made', 'deleted_at', 'created_at', 'updated_at', 'comments']
-    context = {
-        'url_datatable': reverse('users_app:users-datatable'),
-        'user_form': ProfileForm(),
-        'urls': urls,
-        'segment': 'page-user',
-    }
+# # Create your views here.
+# def user_list(request):
+#     """
+#     Método que redirecciona al datatable de usuarios.
+#     """
+#     urls = [
+#         {'id': 'user_create', 'name': 'users_app:users_create'},
+#         {'id': 'user_edit', 'name': 'users_app:users_update'},
+#         {'id': 'user_detail', 'name': 'users_app:users_detail'},
+#         {'id': 'user_delete', 'name': 'users_app:users_delete'}
+#     ]
+#     exclude_fields = ['user_made', 'deleted_at', 'created_at', 'updated_at', 'comments']
+#     context = {
+#         'url_datatable': reverse('users_app:users-datatable'),
+#         'user_form': ProfileForm(),
+#         'urls': urls,
+#         'segment': 'page-user',
+#     }
 
-    return render(request, "users/users_page.html", context)
+#     return render(request, "users/users_page.html", context)
 
-def UsersAjaxList(request):
-    draw = request.GET.get('draw')
-    start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 10))
+# def UsersAjaxList(request):
+#     draw = request.GET.get('draw')
+#     start = int(request.GET.get('start', 0))
+#     length = int(request.GET.get('length', 10))
 
-    order_column_index = int(request.GET.get('order[0][column]', 0))
-    order_direction = request.GET.get('order[0][dir]', 'asc')
-    search_value = request.GET.get('search[value]', None)
+#     order_column_index = int(request.GET.get('order[0][column]', 0))
+#     order_direction = request.GET.get('order[0][dir]', 'asc')
+#     search_value = request.GET.get('search[value]', None)
 
-    column_mapping = { 
-        0: 'id',
-        1: 'username',
-        2: 'email', 
-        3: 'is_active'
-    } 
+#     column_mapping = { 
+#         0: 'id',
+#         1: 'username',
+#         2: 'email', 
+#         3: 'is_active'
+#     } 
     
-    order_column = column_mapping.get(order_column_index, 'id')
+#     order_column = column_mapping.get(order_column_index, 'id')
     
-    if order_direction == 'asc':
-        order_column = F(order_column).asc(nulls_last=True)
-    else:
-        order_column = F(order_column).desc(nulls_last=True)
+#     if order_direction == 'asc':
+#         order_column = F(order_column).asc(nulls_last=True)
+#     else:
+#         order_column = F(order_column).desc(nulls_last=True)
 
-    conditions = Q()
-    if search_value:
-        fields = ['username', 'email', 'first_name', 'last_name', 'id']
-        search_terms = search_value.split()
+#     conditions = Q()
+#     if search_value:
+#         fields = ['username', 'email', 'first_name', 'last_name', 'id']
+#         search_terms = search_value.split()
 
-        for term in search_terms:
-            term_conditions = Q()
-            for field in fields:
-                term_conditions |= Q(**{f"{field}__icontains": term})
-            conditions &= term_conditions
+#         for term in search_terms:
+#             term_conditions = Q()
+#             for field in fields:
+#                 term_conditions |= Q(**{f"{field}__icontains": term})
+#             conditions &= term_conditions
 
-    filtered_data = User.objects.filter(conditions) if conditions else User.objects.all()
-    filtered_data = filtered_data.distinct().order_by(order_column)
-    total_records = filtered_data.count()
+#     filtered_data = User.objects.filter(conditions) if conditions else User.objects.all()
+#     filtered_data = filtered_data.distinct().order_by(order_column)
+#     total_records = filtered_data.count()
 
-    data = [item.to_json() for item in filtered_data[start: start + length]]
+#     data = [item.to_json() for item in filtered_data[start: start + length]]
     
-    return JsonResponse(
-        {
-            'draw': draw,
-            'recordsTotal': total_records,
-            'recordsFiltered': total_records,
-            'data': data,
-        }
-    )
+#     return JsonResponse(
+#         {
+#             'draw': draw,
+#             'recordsTotal': total_records,
+#             'recordsFiltered': total_records,
+#             'data': data,
+#         }
+#     )
 
-def create_user(request):
-    """
-    Vista para crear un nuevo usuario
-    """
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            form.save()  # Guardar el nuevo usuario
-            messages.success(request, "Usuario creado exitosamente.")
-            return redirect('users_app:list')
-        else:
-            messages.error(request, "Por favor, corrige los errores.")
-            print(f"Errores en CREATE USER: {form.errors}")
-    else:
-        form = UserForm()  # Formulario vacío para la primera carga
+# def create_user(request):
+#     """
+#     Vista para crear un nuevo usuario
+#     """
+#     if request.method == 'POST':
+#         form = UserForm(request.POST)
+#         if form.is_valid():
+#             form.save()  # Guardar el nuevo usuario
+#             messages.success(request, "Usuario creado exitosamente.")
+#             return redirect('users_app:list')
+#         else:
+#             messages.error(request, "Por favor, corrige los errores.")
+#             print(f"Errores en CREATE USER: {form.errors}")
+#     else:
+#         form = UserForm()  # Formulario vacío para la primera carga
 
-    context = {
-        'form': form,
-    }
+#     context = {
+#         'form': form,
+#     }
 
-    return render(request, 'users/user_form.html', context)
+#     return render(request, 'users/user_form.html', context)
 
-def detail_user(request, pk):
-    """
-    Vista que me permite ver el detalle de un usuario.
-    """
-    try:
-        user = get_object_or_404(User, pk=pk)
-        if is_ajax(request):
-            data = user.to_json()
-            object = {
-                'status': 'success',
-                'user': data
-            }
-            return JsonResponse(object, status=200)
+# def detail_user(request, pk):
+#     """
+#     Vista que me permite ver el detalle de un usuario.
+#     """
+#     try:
+#         user = get_object_or_404(User, pk=pk)
+#         if is_ajax(request):
+#             data = user.to_json()
+#             object = {
+#                 'status': 'success',
+#                 'user': data
+#             }
+#             return JsonResponse(object, status=200)
         
-        print("NO ES UNA PETICIÓN AJAX")
-        return JsonResponse({'status': 'error', 'message': 'La solicitud no es AJAX.'}, status=400)
-    except Exception as e:
-        print(f"Error back --> {str(e)}")
-        # En caso de error, retorna un JSON con el estado de error
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+#         print("NO ES UNA PETICIÓN AJAX")
+#         return JsonResponse({'status': 'error', 'message': 'La solicitud no es AJAX.'}, status=400)
+#     except Exception as e:
+#         print(f"Error back --> {str(e)}")
+#         # En caso de error, retorna un JSON con el estado de error
+#         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
-def update_user(request, pk):
-    """
-    Vista para actualizar un usuario existente.
-    """
-    user = get_object_or_404(User, pk=pk)
+# def update_user(request, pk):
+#     """
+#     Vista para actualizar un usuario existente.
+#     """
+#     user = get_object_or_404(User, pk=pk)
 
-    if request.method == 'POST':
-        form = UserForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Usuario actualizado exitosamente.")
-            return redirect('users_app:user_list')
-        else:
-            messages.error(request, "Por favor, corrige los errores.")
-            print(f"Errores en UPDATE USER: {form.errors}")
-    else:
-        form = UserForm(instance=user)  # Cargar el formulario con los datos actuales del usuario
+#     if request.method == 'POST':
+#         form = UserForm(request.POST, instance=user)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Usuario actualizado exitosamente.")
+#             return redirect('users_app:user_list')
+#         else:
+#             messages.error(request, "Por favor, corrige los errores.")
+#             print(f"Errores en UPDATE USER: {form.errors}")
+#     else:
+#         form = UserForm(instance=user)  # Cargar el formulario con los datos actuales del usuario
 
-    context = {
-        'form': form,
-        'user': user,
-    }
+#     context = {
+#         'form': form,
+#         'user': user,
+#     }
 
-    return render(request, 'users/user_form.html', context)
+#     return render(request, 'users/user_form.html', context)
 
-def delete_user(request, pk):
-    """
-    Vista que me permite eliminar un usuario.
-    """
-    try:
-        if request.method == 'POST':
-            user = get_object_or_404(User, pk=pk)
-            user.delete()
-            if is_ajax(request):
+# def delete_user(request, pk):
+#     """
+#     Vista que me permite eliminar un usuario.
+#     """
+#     try:
+#         if request.method == 'POST':
+#             user = get_object_or_404(User, pk=pk)
+#             user.delete()
+#             if is_ajax(request):
                 
-                data = user.to_json()
-                context = {
-                    'status': 'success',
-                    'message': 'Usuario eliminado con exito',
-                    'user': data
-                }
-                # No agregamos messages.success porque al ser una eliminacion dinamica no suele pasar el mensaje a menos que se actualice
-                return JsonResponse(context, status=200)
-            else:
-                return JsonResponse({'status': 'error', 'message': 'La solicitud no es AJAX.'}, status=400)
+#                 data = user.to_json()
+#                 context = {
+#                     'status': 'success',
+#                     'message': 'Usuario eliminado con exito',
+#                     'user': data
+#                 }
+#                 # No agregamos messages.success porque al ser una eliminacion dinamica no suele pasar el mensaje a menos que se actualice
+#                 return JsonResponse(context, status=200)
+#             else:
+#                 return JsonResponse({'status': 'error', 'message': 'La solicitud no es AJAX.'}, status=400)
         
 
-    except Exception as e:
-        print(f"Error back --> {str(e)}")
-        # En caso de error, retorna un JSON con el estado de error
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+#     except Exception as e:
+#         print(f"Error back --> {str(e)}")
+#         # En caso de error, retorna un JSON con el estado de error
+#         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 ############################################################

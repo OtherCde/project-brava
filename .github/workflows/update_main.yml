@@ -46,42 +46,21 @@ jobs:
             set -e  # Detener ante errores
             cd htdocs/brava.okarol.com  # Asegúrate de que esta ruta sea correcta
       
-            # Sobrescribir .env copiando el contenido de .env.example
-            cp .env.example .env
+            echo "🔹 Configurando .env..."
+            test -f .env || cp .env.example .env
             
-            # Actualizar las variables del .env con los valores de GitHub Secrets
-            sed -i '/^SECRET_KEY=/d' .env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-      
-            sed -i '/^DB_NAME=/d' .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-      
-            sed -i '/^DB_USER=/d' .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-      
-            sed -i '/^DB_PASSWORD=/d' .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-      
-            sed -i '/^DB_HOST=/d' .env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-      
-            sed -i '/^DB_PORT=/d' .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-      
-            sed -i '/^GOOGLE_CLIENT_ID=/d' .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_ID }}" >> .env
-      
-            sed -i '/^GOOGLE_CLIENT_SECRET=/d' .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_SECRET }}" >> .env
-      
-            sed -i '/^FACEBOOK_APP_ID=/d' .env
-            echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_ID }}" >> .env
-      
-            sed -i '/^FACEBOOK_APP_SECRET=/d' .env
-            echo "FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_SECRET }}" >> .env
-      
-            sed -i '/^FACEBOOK_REDIRECT_URI=/d' .env
-            echo "FACEBOOK_REDIRECT_URI=${{ secrets.FACEBOOK_REDIRECT }}" >> .env
+            # Modificar SOLO las variables necesarias utilizando sed
+            sed -i "s|^SECRET_KEY=.*|SECRET_KEY=${{ secrets.SECRET_KEY }}|" .env
+            sed -i "s|^DB_NAME=.*|DB_NAME=${{ secrets.DB_NAME }}|" .env
+            sed -i "s|^DB_USER=.*|DB_USER=${{ secrets.DB_USER }}|" .env
+            sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|" .env
+            sed -i "s|^DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|" .env
+            sed -i "s|^DB_PORT=.*|DB_PORT=${{ secrets.DB_PORT }}|" .env
+            sed -i "s|^GOOGLE_CLIENT_ID=.*|GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_ID }}|" .env
+            sed -i "s|^GOOGLE_CLIENT_SECRET=.*|GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_SECRET }}|" .env
+            sed -i "s|^FACEBOOK_APP_ID=.*|FACEBOOK_APP_ID=${{ secrets.FACEBOOK_ID }}|" .env
+            sed -i "s|^FACEBOOK_APP_SECRET=.*|FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_SECRET }}|" .env
+            sed -i "s|^FACEBOOK_REDIRECT_URI=.*|FACEBOOK_REDIRECT_URI=${{ secrets.FACEBOOK_REDIRECT }}|" .env
             
             # Actualizar el repositorio
             OLD_COMMIT=$(git rev-parse HEAD)

@@ -408,6 +408,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from django.core.files.base import ContentFile
 import re
 import requests
 import json
@@ -463,6 +464,7 @@ class GoogleLogin(APIView):
             email = id_info["email"]
             first_name = id_info.get("given_name", "")
             last_name = id_info.get("family_name", "")
+            profile_picture_url = id_info.get("picture", "")  # 🔥 Obtener la imagen de perfil
 
             # Generar username único
             username = re.sub(r"[^a-zA-Z0-9_]", "", email.split("@")[0])
@@ -482,6 +484,20 @@ class GoogleLogin(APIView):
                 }
             )
 
+            # 🔥 Si el usuario es nuevo, descargar la imagen y guardarla
+            if created and profile_picture_url:
+                response = requests.get(profile_picture_url, stream=True)
+                if response.status_code == 200:
+                    file_name = f"profile_{user.username}.jpg"
+
+                    # Guarda la imagen correctamente en Django
+                    user.set_unusable_password()  # Marca al usuario como que no tiene con
+                    user.profile_image.save(
+                        file_name,
+                        ContentFile(response.content),  # Asegura que se almacena el contenido, no la URL
+                        save=True
+                    )
+
             # Generar tokens JWT
             refresh = RefreshToken.for_user(user)
 
@@ -491,7 +507,7 @@ class GoogleLogin(APIView):
                 "user": {
                     "id": user.id,
                     "email": user.email,
-                    "username": user.username
+                    "username": user.username,
                 }
             }, status=status.HTTP_200_OK)
 
@@ -523,14 +539,17 @@ class FacebookLogin(APIView):
             # 1. Obtener datos del usuario directamente usando el access token
             graph_url = "https://graph.facebook.com/me"
             graph_params = {
-                "fields": "id,email,first_name,last_name",
+                "fields": "id,email,first_name,last_name,picture",
                 "access_token": access_token
             }
             
             # print("Solicitando datos del usuario a Facebook con el access token...")
             user_response = requests.get(graph_url, params=graph_params)
             user_data = user_response.json()
-            # print("Datos del usuario obtenidos:", user_data)
+            print("Datos del usuario obtenidos:", user_data)
+
+            # Obtener imagen de perfil
+            profile_picture_url = user_data.get("picture", {}).get("data", {}).get("url", "")
             
             if 'email' not in user_data:
                 return Response({"error": "Email no proporcionado por Facebook"}, status=status.HTTP_400_BAD_REQUEST)
@@ -559,10 +578,28 @@ class FacebookLogin(APIView):
                     'last_name': last_name,
                 }
             )
-            # if created:
-            #     print("Usuario creado:", user)
-            # else:
-            #     print("Usuario existente:", user)
+            
+            # Si el usuario es nuevo, descargar y guardar la imagen de perfil
+            if created and profile_picture_url:
+                try:
+                    response = requests.get(profile_picture_url, stream=True)
+                    if response.status_code == 200:
+                        file_name = f"profile_{user.username}.jpg"
+                        user.profile_image.save(
+                            file_name,
+                            ContentFile(response.content),  # Asegura que se almacena el contenido, no la URL
+                            save=True
+                        )
+                except Exception as e:
+                    print(f"Error al guardar la imagen de perfil: {str(e)}")
+                    # Si no se puede obtener la imagen, puedes establecer una imagen predeterminada
+                    user.profile_image = 'media/default.svg'
+                    user.save()
+
+            # Si el usuario es nuevo, también establecemos una contraseña inválida
+            if created:
+                user.set_unusable_password()
+                user.save()
 
             # 4. Generar JWT
             refresh = RefreshToken.for_user(user)
@@ -572,7 +609,7 @@ class FacebookLogin(APIView):
                 'user': {
                     'id': user.id,
                     'email': user.email,
-                    'username': user.username
+                    'username': user.username,
                 }
             }
             print("Respuesta final con tokens JWT:", response_data)

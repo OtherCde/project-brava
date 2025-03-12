@@ -430,7 +430,7 @@ class GoogleLogin(APIView):
                 "code": code,
                 "client_id": settings.GOOGLE_CLIENT_ID,
                 "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                "redirect_uri": "https://agu.dev.demo.okarol.com/users/login/google/callback/",  # Asegúrate de que coincide con Google Console
+                "redirect_uri": "https://agu.dev.demo.okarol.com",  # Asegúrate de que coincide con Google Console
                 "grant_type": "authorization_code",
             }
 

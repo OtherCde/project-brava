@@ -20,29 +20,54 @@ from users.models import User
 class ProgramListByDateView(generics.ListAPIView):
     serializer_class = ProgramSerializer
 
-    def get_queryset(self):
-        """Filtra los programas por la fecha recibida en el parámetro 'date'."""
+    # def get_queryset(self):
+    #     """Filtra los programas por la fecha recibida en el parámetro 'date'."""
         
-        # Mostrar la fecha recibida con emojis
+    #     # Mostrar la fecha recibida con emojis
+    #     date_str = self.request.query_params.get('date', None)
+    #     print(f"📅 Fecha recibida: {date_str}")
+
+    #     if date_str:
+    #         try:
+    #             # Intentamos convertir la fecha
+    #             date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    #             print(f"✅ Formato de fecha válido: {date}")
+
+    #             # Filtrar los programas por la fecha
+    #             queryset = Program.objects.filter(start_time__date=date)
+    #             print(f"🔍 Programas encontrados: {queryset.count()}")
+
+    #             return queryset
+    #         except ValueError:
+    #             # Si el formato de fecha es incorrecto
+    #             print("❌ Error en el formato de fecha")
+    #             return Program.objects.none()  # No devolver programas si la fecha es inválida
+
+    #     print("🔄 No se proporcionó una fecha, devolviendo todos los programas.")
+    #     return Program.objects.all()
+
+    def get_queryset(self):
+        """
+        Filtra los programas según la fecha enviada en el parámetro 'date'.
+        Se asume que los programas se repiten en los días especificados en 'repeat_days'.
+        """
         date_str = self.request.query_params.get('date', None)
         print(f"📅 Fecha recibida: {date_str}")
 
         if date_str:
             try:
-                # Intentamos convertir la fecha
-                date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                print(f"✅ Formato de fecha válido: {date}")
+                query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                # En Python, Monday=0 y Sunday=6
+                weekday = query_date.weekday()
+                print(f"✅ Día de la semana: {weekday} para la fecha {query_date}")
 
-                # Filtrar los programas por la fecha
-                queryset = Program.objects.filter(start_time__date=date)
+                # Filtrar programas cuyos repeat_days contengan el índice del día
+                queryset = Program.objects.filter(repeat_days__contains=[weekday])
                 print(f"🔍 Programas encontrados: {queryset.count()}")
-
                 return queryset
             except ValueError:
-                # Si el formato de fecha es incorrecto
                 print("❌ Error en el formato de fecha")
-                return Program.objects.none()  # No devolver programas si la fecha es inválida
-
+                return Program.objects.none()
         print("🔄 No se proporcionó una fecha, devolviendo todos los programas.")
         return Program.objects.all()
     

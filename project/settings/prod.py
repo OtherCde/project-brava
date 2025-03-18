@@ -4,7 +4,7 @@ from .base import *
 #print("clave \n", secret)
 
 DEBUG = False
-ALLOWED_HOSTS = ['brava.okarol.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['brava.okarol.com', 'localhost', '127.0.0.1', 'fmbravasalta.com.ar']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

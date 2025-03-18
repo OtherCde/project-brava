@@ -182,13 +182,15 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost",
     "https://agu.dev.demo.okarol.com",
+    "https://fmbravasalta.com.ar"
 ]
 
 # Configuración de CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Permitir peticiones desde React
     "http://127.0.0.1:3000",
-    "https://agu.dev.demo.okarol.com"
+    "https://agu.dev.demo.okarol.com",
+    "https://fmbravasalta.com.ar"
 ]
 
 # Si quieres permitir todas las solicitudes desde cualquier origen (no recomendado en producción)

@@ -71,6 +71,7 @@ LOCAL_APPS = (
     'core',
     'blogs',
     'programs',
+    'adverstisements',
 )
 
 # Aplicaciones Locales

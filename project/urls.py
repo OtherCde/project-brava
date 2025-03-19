@@ -29,6 +29,8 @@ urlpatterns = [
     path('blogs/', include('blogs.urls')),
     # Rutas para PROGRAMAS
     path('programs/', include('programs.urls')),
+    # Rutas para PUBLICIDADES 
+    path('advertisements/', include('adverstisements.urls')),
 ]
 
 if settings.DEBUG:

@@ -253,11 +253,15 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # Cliente de Google (necesario para la vista personalizada)
 GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = env('GOOGLE_CLIENT_SECRET')
-# Cliente de Google (necesario para la vista personalizada)
+# Cliente de Facebook (necesario para la vista personalizada)
 FACEBOOK_APP_ID = env('FACEBOOK_APP_ID')
 FACEBOOK_APP_SECRET = env('FACEBOOK_APP_SECRET')
 FACEBOOK_REDIRECT_URI = env('FACEBOOK_REDIRECT_URI')
-
+# Cliente de Spotify (necesario para la vista personalizada)
+SPOTIFY_CLIENT_ID = env('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = env('SPOTIFY_CLIENT_SECRET')
+# Clientes de NEWAPI (necesario para las vista personalizadas)
+NEWS_API_KEY=env('NEWS_API_KEY')
 
 # Configuración adicional
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Para evitar doble verificación

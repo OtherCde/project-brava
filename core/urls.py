@@ -14,5 +14,16 @@ urlpatterns = [
     path('auth/google/', GoogleLogin.as_view(), name='google_login'),
     # Autenticacion por Facebook
     path('auth/facebook/', FacebookLogin.as_view(), name='facebook_login'),
-
+    # Spotify API
+    path(
+        'spotify/get-popular/',
+        get_popular_shows,
+        name="spotify-popular"
+    ),
+    # News API
+    path(
+        'news/',
+        get_news,
+        name="news-popular"
+    ),
 ]

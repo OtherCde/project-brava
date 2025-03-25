@@ -7,7 +7,7 @@ from .serializers import PostSerializer, LikeSerializer, CommentSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils.timezone import now
 from django.shortcuts import get_object_or_404
 
@@ -21,6 +21,13 @@ from django.shortcuts import get_object_or_404
 class PostListView(generics.ListAPIView):
     queryset = Post.objects.filter(deleted_at=None)
     serializer_class = PostSerializer
+    permission_classes = [AllowAny]  # Permite acceso a cualquiera
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        print(f"🔍 Usuario en la vista: {self.request.user}")  # <-- Verifica aquí
+        context["request"] = self.request
+        return context
 
 class CreatePostView(generics.CreateAPIView):
     """Vista para crear un nuevo post."""

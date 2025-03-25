@@ -3,7 +3,10 @@ from .models import Post, Like, Comment
 
 class PostSerializer(serializers.ModelSerializer):
     """Serializer para el modelo Post."""
+    # Variable para saber dinamicamente si el usuario dio like
+    liked = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
+    # Cantidad de likes y comentarios
     likes_count = serializers.ReadOnlyField()
     comments_count = serializers.ReadOnlyField()
 
@@ -17,7 +20,8 @@ class PostSerializer(serializers.ModelSerializer):
             "image", 
             "created_at",
             'likes_count',
-            'comments_count'
+            'comments_count',
+            'liked',
         ]
         read_only_fields = ['author']
 
@@ -27,6 +31,15 @@ class PostSerializer(serializers.ModelSerializer):
             "name": obj.author.get_full_name(),
             "avatar": obj.author.profile_image.url if obj.author.profile_image else None,
         }
+
+    def get_liked(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            liked = Like.objects.filter(post=obj, user=request.user, deleted_at__isnull=True).exists()
+            # print(f"🔍 Usuario: {request.user} - Post: {obj.id} - Liked: {liked}")
+            return liked
+        # print("❌ Usuario no autenticado o sin request")
+        return False
     
     def create(self, validated_data):
         """Asigna el usuario autenticado como autor al crear un post."""

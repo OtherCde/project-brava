@@ -2,17 +2,18 @@ from django.db import models
 from core.models import BaseAbstractWithUser
 from datetime import date, datetime, timedelta
 from django.core.validators import MinValueValidator
+from .utils import validation_program
 
 # Definimos los días de la semana (recordá que Python usa 0=Lunes, 6=Domingo)
-DAYS_OF_WEEK = (
-    (0, 'Lunes'),
-    (1, 'Martes'),
-    (2, 'Miércoles'),
-    (3, 'Jueves'),
-    (4, 'Viernes'),
-    (5, 'Sábado'),
-    (6, 'Domingo'),
-)
+DAYS_OF_WEEK = {
+    0: 'Lunes',
+    1: 'Martes',
+    2: 'Miércoles',
+    3: 'Jueves',
+    4: 'Viernes',
+    5: 'Sábado',
+    6: 'Domingo',
+}
 
 class Program(BaseAbstractWithUser):
     title = models.CharField(max_length=150)
@@ -76,6 +77,12 @@ class Program(BaseAbstractWithUser):
         start_dt = datetime.combine(today, self.start_time)
         end_dt = start_dt + timedelta(minutes=self.duration_in_minutes)
         return end_dt.time()
+
+    def clean(self):
+        """
+        Validación para evitar que se solapen programas en el mismo día.
+        """
+        validation_program(self, Program)
 
     def __str__(self):
         return f"{self.title} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"

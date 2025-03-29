@@ -41,9 +41,16 @@ class ProgramAdminForm(forms.ModelForm):
 
 class ProgramAdmin(admin.ModelAdmin):
     form = ProgramAdminForm
-    list_display = ('title', 'start_time', 'duration_in_minutes', 'category', 'get_host_name')
+    list_display = ('title', 'start_time', 'duration_in_minutes', 'category', 'get_host_name', 'display_repeat_days')
     list_filter = ('category',)
     search_fields = ('title', 'description')
     ordering = ('title',)
+
+    def display_repeat_days(self, obj):
+        """Muestra los días de la semana en los que se repite el programa."""
+        day_names = [dict(DAYS_OF_WEEK)[day] for day in obj.repeat_days]
+        return ", ".join(day_names) if day_names else "No programado"
+
+    display_repeat_days.short_description = "Días de emisión"
 
 admin.site.register(Program, ProgramAdmin)
